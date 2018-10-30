@@ -2,6 +2,7 @@ package lab01;
 
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -23,7 +24,7 @@ public class Main {
 
             for (int i = 0; i < N; i++) {
                 System.out.println("round: " + i);
-                String[] intList = generateRandomStringArray(arrayN);
+                String[] intList = randomStringArray(arrayN);
                 Arrays.sort(intList);
 
                 StringBuilder result = new StringBuilder();
@@ -50,7 +51,7 @@ public class Main {
         }
     }
 
-    public static Integer[] generateRandomIntegerArray(int n){
+    public static Integer[] randomIntegerArray(int n){
         Integer[] list = new Integer[n];
         Random random = new Random();
 
@@ -61,16 +62,23 @@ public class Main {
         return list;
     }
 
-    public static String[] generateRandomStringArray(int n){
-        String[] list = new String[n];
+    public static String[] randomStringArray(int len){
+        String[] list = new String[len];
         Random random = new Random();
 
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < len; i++)
         {
-            byte[] array = new byte[2];
-            random.nextBytes(array);
-            list[i] = new String(array, Charset.forName("UTF-8"));
+            list[i] = randomString(32);
         }
         return list;
+    }
+
+    static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    private static String randomString(int len) {
+        SecureRandom rnd = new SecureRandom();
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++)
+            sb.append(AB.charAt(rnd.nextInt(AB.length())));
+        return sb.toString();
     }
 }
