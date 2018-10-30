@@ -94,11 +94,9 @@ public class MyDictionary {
         if (objArray[i] == null) {
             return null;
         }
-        if (objArray[i].getNext() == null) {
-            return objArray[getIndex(key)];
-        }
         Node n = objArray[i];
-        while (n.getNext() != null) {
+
+        while (n != null) {
             if (n.getKey().equals(key)) {
                 return n.getContent();
             }
@@ -121,8 +119,23 @@ public class MyDictionary {
 
     int del(String key) {
         int i = getIndex(key);
-        objArray[i] = null;
-        return i;
+        Node n = objArray[i];
+        if (n == null) return -1;
+        Node prev = null;
+        while (n != null) {
+            if (n.getKey().equals(key)) {
+                if (prev == null) {
+                    objArray[i] = n.getNext();
+                } else {
+                    prev.setNext(n.getNext());
+                }
+                return i;
+            }
+            prev = n;
+            n = n.getNext();
+        }
+
+        return -1;
     }
 
     public void printDictionary() {
