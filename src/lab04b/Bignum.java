@@ -2,74 +2,127 @@ package lab04b;
 
 import java.util.Arrays;
 
+/**
+ *
+ * @author Jarkko
+ */
 public class Bignum {
+    private byte[] number;          // least significand digit first (index 0), most significand last (index length-1)
+    private static int mulCounter;  // variable to count the number of multiplications
 
-    byte[] byteNum;
 
-    public Bignum(String s1) {
-        char zero = '0';
-        byteNum = new byte[s1.length()];
-        char[] chars = s1.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            byteNum[i] = (byte)(chars[i]-zero);
+    public Bignum(int n) {
+        number = new byte[n];
+    }
+    
+    public Bignum(String s) {
+        int     n = s.length();
+        number = new byte[n];
+
+        for (int i = n-1; i >= 0; i--)
+            number[n-i-1] = (byte)Character.getNumericValue(s.charAt(i));
+    }
+
+    
+    /* print out the number to the string s */
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        
+        for (int i = number.length-1; i >= 0; i--)
+            s.append(number[i]);
+        
+        return (s.toString());
+    }
+
+
+    /* print out the given number (for debug only) */
+    public void printBigNum(String s) {
+        System.out.println(s + ": " + toString());
+    }
+
+
+    /* create a new number whose digits are x[from, to) */
+    public Bignum selectBigNum(int from, int to) {
+        Bignum r = new Bignum(to-from);
+
+        for (int i = from; i < to; i++)
+            r.number[i-from] = number[i];
+
+        return r;
+    }
+
+
+    /* subtract two numbers this - y */
+    public Bignum subBigNum(Bignum y) throws Exception {
+            Bignum r = new Bignum(number.length);
+            int    carry;
+
+            // sub digits, starting from the least significant digit
+            carry = 0;
+            for (int i = 0; i < number.length; i++) {
+                r.number[i] = (byte)(number[i] - (i < y.number.length ? y.number[i] : 0) - carry);
+                if (r.number[i] < 0) {
+                    carry = 1;
+                    r.number[i] += 10;
+                } else
+                    carry = 0;
         }
-    }
 
-    public Bignum mulBigNum(Bignum n2) {
-
-        return null;
-    }
-
-    private byte[] multiply(byte[] arrA, byte[] arrB) {
-
-        if (arrA.length != arrB.length) {
-            if (arrA.length > arrB.length)
-                arrB = resize(arrB, arrA.length);
-            else
-                arrA = resize(arrA, arrB.length);
+        if (carry > 0) {
+            throw new Exception("Overflow in subtraction\n");
         }
-        if (arrA.length == 0) return new byte[1];
-        if (arrA.length == 1)
-            //return arrA[0] * arrB[0];
-            ;
 
-        int mid = arrA.length / 2;
-        byte[] arrAl = Arrays.copyOfRange(arrA, 0, mid-1);
-        byte[] arrAr = Arrays.copyOfRange(arrA, mid, arrA.length-1);
-        byte[] arrBl = Arrays.copyOfRange(arrA, 0, mid-1);
-        byte[] arrBr = Arrays.copyOfRange(arrA, mid, arrA.length-1);
-
-        byte[] P1 = multiply(arrAl, arrBl);
-        //byte[] P2 = multiply(arrAl + arrAr, arrBl + arrBr);
-        byte[] P3 = multiply(arrAr, arrBr);
-
-        //return P1* Math.pow(10, arrA.length) + (P2 - P1 - P3) * Math.pow(10, arrA.length/2) + P3;
-        return new byte[2];
+        return r;
     }
 
-    private byte[] resize(byte[] arr, int n) {
-        byte[] newArr = new byte[n];
-        for (int i = arr.length - 1; i >= 0; i--) {
-            newArr[i] = arr[i];
+
+    /* add two numbers together this + y */
+    public Bignum addBigNum(Bignum y) {
+        Bignum r, a, b;
+        int    carry;
+
+        // a is the larger number, b is the smaller
+        if (number.length > y.number.length) {
+            a = this; b = y;
+        } else {
+            a = y; b = this;
         }
-        return newArr;
+
+        r = new Bignum(a.number.length);
+
+        // add digits, starting from the least significant digit
+        carry = 0;
+        for (int i = 0; i < a.number.length; i++) {
+            r.number[i] = (byte)(a.number[i] + (i < b.number.length ? b.number[i] : 0) + carry);
+            if (r.number[i] > 9) {
+                carry = 1;
+                r.number[i] -= 10;
+            } else
+                carry = 0;
+        }
+
+        if (carry > 0) {
+            r.number = Arrays.copyOf(r.number, r.number.length+1);
+            r.number[r.number.length-1] = 1;
+        }
+
+        return r;
     }
+
+
+    /* multiply two numbers (this * y) together using divide-and-conquer technique */
+    public Bignum mulBigNum(Bignum y) throws Exception {
+		// you work is to be done here!!!
+        return new Bignum(1);
+    }
+
+
+    public void clrMulCounter() {
+        mulCounter = 0;
+    }
+
 
     public int rclMulCounter() {
-        return 1;
-    }
-
-
-    public static void main(String[] args) {
-        Bignum b = new Bignum("0123456789");
-        System.out.println(b);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (byte b: byteNum)
-            sb.append(b);
-        return sb.toString();
+        return (mulCounter);
     }
 }
