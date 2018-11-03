@@ -24,16 +24,16 @@ public class Lab04b {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        BignumMy n1, n2, result;
+        Bignum n1, n2, result;
         int n;
         String s1, s2;
         try {
             for (int i = 1; i < 30; i++) {
-                s1 = createTestNumber(i); n1 = new BignumMy(s1); System.out.format("%1$30s * ", n1.toString());
-                s2 = createTestNumber(i); n2 = new BignumMy(s2); System.out.format("%1$30s = ", n2.toString());
-                result = n1.mulBigNum(n2);
-                n = result.rclMulCounter();
-                System.out.format("%1$60s (%2$d)\n", result, n);
+                s1 = createTestNumber(i); n1 = new Bignum(s1); System.out.format("%1$30s * ", n1.toString());
+                s2 = createTestNumber(i); n2 = new Bignum(s2); System.out.format("%1$30s = ", n2.toString());
+                //result = n1.mulBigNum(n2);
+                //n = result.rclMulCounter();
+                //System.out.format("%1$60s (%2$d)\n", result, n);
             }
         } catch (Exception e) {
             System.out.println(e);

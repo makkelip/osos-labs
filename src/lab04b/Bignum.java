@@ -1,5 +1,7 @@
 package lab04b;
 
+import com.sun.deploy.util.ArrayUtil;
+
 import java.util.Arrays;
 
 /**
@@ -112,17 +114,49 @@ public class Bignum {
 
     /* multiply two numbers (this * y) together using divide-and-conquer technique */
     public Bignum mulBigNum(Bignum y) throws Exception {
-		// you work is to be done here!!!
-        return new Bignum(1);
+        if (number.length == 1 && y.number.length == 1) {
+            mulCounter++;
+            return new Bignum(Integer.toString(number[0] * y.number[0]));
+        }
+        int n = Math.max(number.length,y.number.length);
+        int mid = n / 2;
+
+        Bignum Al = selectBigNum(0,mid);
+        Bignum Ar = selectBigNum(mid-1, number.length-1);
+        Bignum Bl = y.selectBigNum(0,mid);
+        Bignum Br = y.selectBigNum(mid-1, number.length-1);
+
+        Bignum P1 = Al.mulBigNum(Bl);
+        Bignum P2 = Al.addBigNum(Ar).mulBigNum(Bl.addBigNum(Br));
+        Bignum P3 = Ar.mulBigNum(Bl);
+
+        Bignum P4 = P2.subBigNum(P1).subBigNum(P3);
+        P1.addZeros(n);
+        P4.addZeros(n/2);
+        return P1.addBigNum(P4).addBigNum(P3);
     }
 
+    public void addZeros(int n) {
+        byte[] newarr = new byte[number.length + n];
+        System.arraycopy(number, 0, newarr, newarr.length-number.length, number.length);
+        number = newarr;
+    }
 
     public void clrMulCounter() {
         mulCounter = 0;
     }
 
-
     public int rclMulCounter() {
         return (mulCounter);
+    }
+
+    public static void main(String[] args) {
+        Bignum b = new Bignum("12345");
+        try {
+            Bignum b2 = b.mulBigNum(b);
+            System.out.println(b2);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
