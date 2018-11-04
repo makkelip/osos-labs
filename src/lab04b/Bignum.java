@@ -57,7 +57,6 @@ public class Bignum {
 
     /* subtract two numbers this - y */
     public Bignum subBigNum(Bignum y) throws Exception {
-        System.out.println(this.toString() + " - " + y.toString());
             Bignum r = new Bignum(number.length);
             int    carry;
 
@@ -116,10 +115,6 @@ public class Bignum {
 
     /* multiply two numbers (this * y) together using divide-and-conquer technique */
     public Bignum mulBigNum(Bignum y) throws Exception {
-        /*
-        if (number.length == 0) return y;
-        if (y.number.length == 0) return this;
-        */
         if (number.length == 1 || y.number.length == 1) {
             if (number[0] == 0 || y.number[0] == 0) return new Bignum(1);
             Bignum a,b;
@@ -154,16 +149,11 @@ public class Bignum {
         int n = Math.max(a.number.length, b.number.length);
         int aMid = a.number.length / 2;
         int bMid = b.number.length / 2;
-        /*
-        if (number.length % 2 != 0)
-            System.arraycopy(number,0, number, 0,number.length + 1);
-        if (y.number.length % 2 != 0)
-            System.arraycopy(y.number, 0, y.number, 0, y.number.length + 1);
-        */
+
         Bignum Ar = a.selectBigNum(0,aMid);
-        Bignum Al = a.selectBigNum(aMid, number.length);
+        Bignum Al = a.selectBigNum(aMid, a.number.length);
         Bignum Br = b.selectBigNum(0,bMid);
-        Bignum Bl = b.selectBigNum(bMid, y.number.length);
+        Bignum Bl = b.selectBigNum(bMid, b.number.length);
 
         Bignum P1 = Al.mulBigNum(Bl);
         Bignum P2 = Al.mulBigNum(Br);
@@ -174,6 +164,7 @@ public class Bignum {
         P1.addZeros(n);
         P5.addZeros(n/2);
         return P1.addBigNum(P5).addBigNum(P4);
+
     }
 
     public void addZeros(int n) {
