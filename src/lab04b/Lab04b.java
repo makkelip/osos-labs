@@ -37,6 +37,7 @@ public class Lab04b {
             }
         } catch (Exception e) {
             System.out.println(e);
+            e.printStackTrace();
         }
     }
 }

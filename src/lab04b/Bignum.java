@@ -130,9 +130,11 @@ public class Bignum {
             for (int i = 1; i < bInt; i++) {
                 mulBig = mulBig.addBigNum(a);
             }
+            mulCounter++;
             return mulBig;
         }
         Bignum a,b;
+
         if (number.length % 2 == 0)
             a = this;
         else {
@@ -163,8 +165,12 @@ public class Bignum {
         Bignum P5 = P2.addBigNum(P3);
         P1.addZeros(n);
         P5.addZeros(n/2);
-        return P1.addBigNum(P5).addBigNum(P4);
 
+        Bignum finalBig = P1.addBigNum(P5).addBigNum(P4);
+        int len = finalBig.number.length - 1;
+        while (finalBig.number[len] == 0 && len != 0) len--;
+        finalBig = finalBig.selectBigNum(0, len);
+        return finalBig;
     }
 
     public void addZeros(int n) {
