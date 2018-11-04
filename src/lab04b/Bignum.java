@@ -2,6 +2,7 @@ package lab04b;
 
 import com.sun.deploy.util.ArrayUtil;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -56,6 +57,7 @@ public class Bignum {
 
     /* subtract two numbers this - y */
     public Bignum subBigNum(Bignum y) throws Exception {
+        System.out.println(this.toString() + " - " + y.toString());
             Bignum r = new Bignum(number.length);
             int    carry;
 
@@ -114,26 +116,64 @@ public class Bignum {
 
     /* multiply two numbers (this * y) together using divide-and-conquer technique */
     public Bignum mulBigNum(Bignum y) throws Exception {
-        if (number.length == 1 && y.number.length == 1) {
-            mulCounter++;
-            return new Bignum(Integer.toString(number[0] * y.number[0]));
+        /*
+        if (number.length == 0) return y;
+        if (y.number.length == 0) return this;
+        */
+        if (number.length == 1 || y.number.length == 1) {
+            if (number[0] == 0 || y.number[0] == 0) return new Bignum(1);
+            Bignum a,b;
+            if (number.length > y.number.length) {
+                a = this;
+                b = y;
+            } else {
+                a = y;
+                b = this;
+            }
+            int bInt = Byte.toUnsignedInt(b.number[0]);
+            Bignum mulBig = a;
+            for (int i = 1; i < bInt; i++) {
+                mulBig = mulBig.addBigNum(a);
+            }
+            return mulBig;
         }
-        int n = Math.max(number.length,y.number.length);
-        int mid = n / 2;
+        Bignum a,b;
+        if (number.length % 2 == 0)
+            a = this;
+        else {
+            a = new Bignum(number.length + 1);
+            System.arraycopy(number,0, a.number,0,number.length);
+        }
+        if (y.number.length % 2 == 0)
+            b = y;
+        else {
+            b = new Bignum(y.number.length + 1);
+            System.arraycopy(y.number,0,b.number,0, y.number.length);
+        }
 
-        Bignum Al = selectBigNum(0,mid);
-        Bignum Ar = selectBigNum(mid-1, number.length-1);
-        Bignum Bl = y.selectBigNum(0,mid);
-        Bignum Br = y.selectBigNum(mid-1, number.length-1);
+        int n = Math.max(a.number.length, b.number.length);
+        int aMid = a.number.length / 2;
+        int bMid = b.number.length / 2;
+        /*
+        if (number.length % 2 != 0)
+            System.arraycopy(number,0, number, 0,number.length + 1);
+        if (y.number.length % 2 != 0)
+            System.arraycopy(y.number, 0, y.number, 0, y.number.length + 1);
+        */
+        Bignum Ar = a.selectBigNum(0,aMid);
+        Bignum Al = a.selectBigNum(aMid, number.length);
+        Bignum Br = b.selectBigNum(0,bMid);
+        Bignum Bl = b.selectBigNum(bMid, y.number.length);
 
         Bignum P1 = Al.mulBigNum(Bl);
-        Bignum P2 = Al.addBigNum(Ar).mulBigNum(Bl.addBigNum(Br));
+        Bignum P2 = Al.mulBigNum(Br);
         Bignum P3 = Ar.mulBigNum(Bl);
+        Bignum P4 = Ar.mulBigNum(Br);
 
-        Bignum P4 = P2.subBigNum(P1).subBigNum(P3);
+        Bignum P5 = P2.addBigNum(P3);
         P1.addZeros(n);
-        P4.addZeros(n/2);
-        return P1.addBigNum(P4).addBigNum(P3);
+        P5.addZeros(n/2);
+        return P1.addBigNum(P5).addBigNum(P4);
     }
 
     public void addZeros(int n) {
@@ -151,7 +191,7 @@ public class Bignum {
     }
 
     public static void main(String[] args) {
-        Bignum b = new Bignum("12345");
+        Bignum b = new Bignum("1200");
         try {
             Bignum b2 = b.mulBigNum(b);
             System.out.println(b2);

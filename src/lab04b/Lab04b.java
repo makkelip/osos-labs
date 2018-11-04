@@ -31,9 +31,9 @@ public class Lab04b {
             for (int i = 1; i < 30; i++) {
                 s1 = createTestNumber(i); n1 = new Bignum(s1); System.out.format("%1$30s * ", n1.toString());
                 s2 = createTestNumber(i); n2 = new Bignum(s2); System.out.format("%1$30s = ", n2.toString());
-                //result = n1.mulBigNum(n2);
-                //n = result.rclMulCounter();
-                //System.out.format("%1$60s (%2$d)\n", result, n);
+                result = n1.mulBigNum(n2);
+                n = result.rclMulCounter();
+                System.out.format("%1$60s (%2$d)\n", result, n);
             }
         } catch (Exception e) {
             System.out.println(e);
