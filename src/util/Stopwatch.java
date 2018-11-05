@@ -15,12 +15,12 @@ import static java.lang.Math.sqrt;
 
 public final class Stopwatch {
 
-    @FunctionalInterface
     public interface Test {
         void test();
+        void setup();
     }
 
-    Stopwatch() {
+    public Stopwatch() {
         measurements = new ArrayList<>();
     }
 
@@ -103,6 +103,7 @@ public final class Stopwatch {
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         measurements.clear();
         for (int i = 0; i < N+M; i++) {
+            method.setup();
             method.test();
             fStart = System.nanoTime();
             method.test();

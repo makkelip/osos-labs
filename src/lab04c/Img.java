@@ -19,7 +19,7 @@ public class Img {
                 } else {
                     rgb = 255 * arr[size * y + x] / devider;
                     rgb = (rgb << 8) + 255 * arr[size * y + x] / devider;
-                    rgb = (rgb << 8) + 255 * arr[size * x + y] / devider;
+                    rgb = (rgb << 8) + 255 * arr[size * y + x] / devider;
                 }
                 image.setRGB(x, y, rgb);
             }
