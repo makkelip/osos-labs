@@ -24,40 +24,55 @@ public class MinMax {
         return comp;
     }
 
-    public void minmax() {// min and max element locations (indexes) are returned
-        comp = 0;
-        int[] a = split(array, 0, array.length - 1);
-        minI = a[0];
-        maxI = a[1];
-        System.out.println("min: " + array[minI] + " max: " + array[maxI]);
-    }
-
-    public int[] split(Comparable[] arr, int i, int j) {
-        int resArr[] = new int[2];
-        int mid;
-
-        if (i == j) {
-            resArr[0] = resArr[1] = i;
-        } else {
-            mid = (i + j) / 2;
-            //Devide
-            int[] left = split(arr, i, mid);
-            int[] right = split(arr, mid+1, j);
-            //Combine
-            //bigger
-            comp++;
-            if (arr[left[1]].compareTo(arr[right[1]]) > 0)
-                resArr[1] = left[1];
-            else
-                resArr[1] = right[1];
-            //smaller
-            comp++;
-            if (arr[left[0]].compareTo(arr[right[0]]) < 0)
-                resArr[0] = left[0];
-            else
-                resArr[0] = right[0];
+    public void minmax() {
+        int i, start;
+        if (this.array.length < 1) {
+            return;
+        } else if (this.array.length == 1) {
+            minI = 0;
+            maxI = 0;
+            return;
         }
-        return resArr;
+        start = 1;
+
+        if (this.array.length % 2 == 1) { // odd lenght
+            minI = 0;
+            maxI = 0;
+        } else { // even lenght
+            comp++;
+            if (this.array[0].compareTo(this.array[1]) > 0) {
+                minI = 1;
+                maxI = 0;
+            } else {
+                minI = 0;
+                maxI = 1;
+            }
+            start = 2;
+        }
+        // compare remaining pairs
+        for (i = start; i < this.array.length; i += 2) {
+
+            comp++;
+            if (this.array[i].compareTo(this.array[i + 1]) > 0) {
+                comp++;
+                if (this.array[i].compareTo(this.array[maxI]) > 0) {
+                    maxI = i;
+                }
+                comp++;
+                if (this.array[i + 1].compareTo(this.array[minI]) < 0) {
+                    minI = i + 1;
+                }
+            } else {
+                comp++;
+                if (this.array[i + 1].compareTo(this.array[maxI]) > 0) {
+                    maxI = i + 1;
+                }
+                comp++;
+                if (this.array[i].compareTo(this.array[minI]) < 0) {
+                    minI = i;
+                }
+            }
+        }
     }
 
     public void minmax2() {
@@ -74,6 +89,5 @@ public class MinMax {
                 maxI = i;
             }
         }
-        System.out.println("min: " + array[minI] + " max: " + array[maxI]);
     }
 }

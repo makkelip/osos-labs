@@ -104,7 +104,7 @@ public final class Stopwatch {
         measurements.clear();
         for (int i = 0; i < N+M; i++) {
             method.setup();
-            method.test();
+            //method.test();
             fStart = System.nanoTime();
             method.test();
             fStop = System.nanoTime();

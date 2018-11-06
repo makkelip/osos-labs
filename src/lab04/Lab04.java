@@ -21,7 +21,7 @@ public class Lab04 {
         }
         System.out.println();
     }
-    private final static int N = 100;
+    private final static int N = 10;
 
 /**
  * @param args the command line arguments
