@@ -10,12 +10,8 @@ public class Graph {
 
     private LinkedList<Integer>[] adjList;
 
-    public Graph() {
-        adjList = new LinkedList[5];
-        adjList[0] = new LinkedList<>();
-    }
     public int nodes() {
-        return 0;
+        return adjList.length;
     }
 
     public boolean readGraph(File file) {
@@ -57,6 +53,12 @@ public class Graph {
     }
 
     public void dfs(int start, boolean visited[], int pred[]) {
-
+        for (int i: adjList[start]) {
+            if (!visited[i]) {
+                pred[i] = start;
+                visited[i] = true;
+                dfs(i, visited, pred);
+            }
+        }
     }
 }
