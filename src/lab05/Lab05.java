@@ -20,7 +20,7 @@ public class Lab05 {
         return (n+1);
     }
 
-    private final static String FILE = "./output/maze.grh";
+    private final static String FILE = "./src/lab05/maze.grh";
     private final static int FROM = 0;
     private final static int TO = 15;
 
