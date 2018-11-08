@@ -83,10 +83,11 @@ public class Lab06 {
 
     private static int[] greedySearch() {
         int[] sorted = sortValueToWeight();
+        System.out.println("Sorted:\n" + Arrays.toString(sorted));
         int[] result = new int[0];
-        for (int i = 0; i < sorted.length && weightSum(result) + weights[i] <= C; i++) {
+        for (int i = 0; i < sorted.length && weightSum(result) + weights[sorted[i]] <= C; i++) {
             result = Arrays.copyOf(result, result.length + 1);
-            result[result.length - 1] = i;
+            result[result.length - 1] = sorted[i];
         }
         return result;
     }
@@ -124,6 +125,7 @@ public class Lab06 {
     private static float valueToWeight(int item) {
         return (float)values[item] / weights[item];
     }
+
     private static int valueSum(int[] items) {
         if (items == null) throw new IllegalArgumentException("item list is null");
 
@@ -141,7 +143,6 @@ public class Lab06 {
             weight += weights[i];
         return weight;
     }
-
 
     private static final BigDecimal MILLION = new BigDecimal("1000000");
 
