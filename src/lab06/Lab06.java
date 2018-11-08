@@ -2,6 +2,7 @@ package lab06;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -18,6 +19,9 @@ public class Lab06 {
     private static double FINALCOMBS = 0;
     private static double COMBS = 0;
     private static DecimalFormat df = new DecimalFormat("#.##");
+
+    private static double fStart;
+    private static double fStop;
 
     private static void print() {
         StringBuilder stringBuilder = new StringBuilder("N: " + N + '\n');
@@ -52,16 +56,29 @@ public class Lab06 {
         }
         print();
         System.out.println("Final combinations: " + FINALCOMBS);
+
+        int oldPriority = Thread.currentThread().getPriority();
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+
         //Search for optimal solution
+        fStart = System.nanoTime();
         int[] best = bruteSearch(0, new int[0]);
+        fStop = System.nanoTime();
         COMBS = 0;
         System.out.println("Optimal solution: " + valueSum(best) + " " + weightSum(best));
         System.out.println(Arrays.toString(best));
+        System.out.println("Time " + convertTime(fStart, fStop) + "ms");
+
         //Search for greedy solution
+        fStart = System.nanoTime();
         int[] greedy = greedySearch();
+        fStop = System.nanoTime();
         COMBS = 0;
         System.out.println("Feasible solution (not necessarily optimal) found:" + valueSum(greedy) + " " + weightSum(greedy));
         System.out.println(Arrays.toString(greedy));
+        System.out.println("Time " + convertTime(fStart, fStop) + "ms");
+
+        Thread.currentThread().setPriority(oldPriority);
     }
 
     private static int[] greedySearch() {
@@ -123,5 +140,14 @@ public class Lab06 {
         for (Integer i: items)
             weight += weights[i];
         return weight;
+    }
+
+
+    private static final BigDecimal MILLION = new BigDecimal("1000000");
+
+    private static BigDecimal convertTime(double start, double stop) {
+        BigDecimal value = new BigDecimal(stop - start);//scale is zero
+        //millis, with 3 decimals:
+        return value.divide(MILLION, 3, BigDecimal.ROUND_HALF_EVEN);
     }
 }
