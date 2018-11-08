@@ -9,146 +9,46 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 public class Lab06 {
-    private static final String PATH = "./src/lab06/hard33.txt";
 
-    private static int C;
-    private static int N;
-    static int[] values;
-    private static int[] weights;
+    private static final String FILE = "./src/lab06/hard33.txt";
+    private final static int ALG = 3;
 
-    private static double FINALCOMBS = 0;
-    private static double COMBS = 0;
-    private static DecimalFormat df = new DecimalFormat("#.##");
-
-    private static double fStart;
-    private static double fStop;
-
-    private static void print() {
-        StringBuilder stringBuilder = new StringBuilder("N: " + N + '\n');
-        stringBuilder.append("C: " + C + '\n');
-        for (int i = 0; i < N; i++) {
-            stringBuilder.append(i +1);
-            stringBuilder.append("\tvalue: " + values[i]);
-            stringBuilder.append("\tweight: " + weights[i]);
-            stringBuilder.append("\t v/w: " + (float)values[i] / weights[i]);
-            stringBuilder.append('\n');
-        }
-        System.out.println(stringBuilder.toString());
-    }
-
+    /**
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
-        //Read file for items, sack capacity and item count
-        try {
-            Scanner scanner = new Scanner(new File(PATH));
-            N = scanner.nextInt();
-            values = new int[N];
-            weights = new int[N];
-            for (int i = 0; i < N; i++) {
-                scanner.nextInt();
-                values[i] = scanner.nextInt();
-                weights[i] = scanner.nextInt();
-            }
-            C = scanner.nextInt();
-            FINALCOMBS = Math.pow(2,N);
-            scanner.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        KnapSack ks = new KnapSack();
+
+        ks.readKnapSack(new File(FILE));
+        ks.printKnapSack();
+
+        long tic = System.currentTimeMillis();
+        switch (ALG) {
+            case 1:
+                ks.bruteForce();
+                break;
+
+            case 2:
+                ks.greedy();
+                break;
+
+            case 3:
+                ks.greedyheuristic();
+                break;
         }
-        print();
-        System.out.println("Final combinations: " + FINALCOMBS);
+        long tac = System.currentTimeMillis();
 
-        int oldPriority = Thread.currentThread().getPriority();
-        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+        switch (ALG) {
+            case 1:
+                ks.printSolution("Optimal solution found: ");
+                break;
 
-        //Search for optimal solution
-        fStart = System.nanoTime();
-        int[] best = bruteSearch(0, new int[0]);
-        fStop = System.nanoTime();
-        COMBS = 0;
-        System.out.println("Optimal solution: " + valueSum(best) + " " + weightSum(best));
-        System.out.println(Arrays.toString(best));
-        System.out.println("Time " + convertTime(fStart, fStop) + "ms");
-
-        //Search for greedy solution
-        fStart = System.nanoTime();
-        int[] greedy = greedySearch();
-        fStop = System.nanoTime();
-        COMBS = 0;
-        System.out.println("Feasible solution (not necessarily optimal) found:" + valueSum(greedy) + " " + weightSum(greedy));
-        System.out.println(Arrays.toString(greedy));
-        System.out.println("Time " + convertTime(fStart, fStop) + "ms");
-
-        Thread.currentThread().setPriority(oldPriority);
-    }
-
-    private static int[] greedySearch() {
-        int[] sorted = sortValueToWeight();
-        System.out.println("Sorted:\n" + Arrays.toString(sorted));
-        int[] result = new int[0];
-        for (int i = 0; i < sorted.length && weightSum(result) + weights[sorted[i]] <= C; i++) {
-            result = Arrays.copyOf(result, result.length + 1);
-            result[result.length - 1] = sorted[i];
+            case 2:
+            case 3:
+                ks.printSolution("Feasible solution (not necessarily optimal) found: ");
+                break;
         }
-        return result;
-    }
 
-    private static int[] bruteSearch(int index, int[] items) {
-        COMBS++;
-        if (COMBS % 1000000 == 0) System.out.println(df.format(COMBS / FINALCOMBS * 100) + "%");
-        int[] childItems = new int[0];
-        for (int i = index; i < N; i++) {
-            int[] b = Arrays.copyOf(items, items.length + 1);
-            b[items.length] = i;
-            b = bruteSearch(i + 1, b);
-            if (valueSum(b) > valueSum(childItems) && weightSum(b) <= C)
-                childItems = b;
-        }
-        if (valueSum(items) > valueSum(childItems))
-            return items;
-        return childItems;
-    }
-
-    private static int[] sortValueToWeight() {
-        int[] sort = new int[N];
-        for (int i = 0; i < N; i++)
-            sort[i] = i;
-        for (int s = 1; s < sort.length; s++) {
-            int sortable = sort[s];
-            int i;
-            for (i = s-1; i >= 0 && valueToWeight(sortable) > valueToWeight(sort[i]); i--)
-                sort[i+1] = sort[i];
-            sort[i+1] = sortable;
-        }
-        return sort;
-    }
-
-    private static float valueToWeight(int item) {
-        return (float)values[item] / weights[item];
-    }
-
-    private static int valueSum(int[] items) {
-        if (items == null) throw new IllegalArgumentException("item list is null");
-
-        int value = 0;
-        for (Integer i: items)
-            value += values[i];
-        return value;
-    }
-
-    private static int weightSum(int[] items) {
-        if (items == null) throw new IllegalArgumentException("item list is null");
-
-        int weight = 0;
-        for (Integer i: items)
-            weight += weights[i];
-        return weight;
-    }
-
-    private static final BigDecimal MILLION = new BigDecimal("1000000");
-
-    private static BigDecimal convertTime(double start, double stop) {
-        BigDecimal value = new BigDecimal(stop - start);//scale is zero
-        //millis, with 3 decimals:
-        return value.divide(MILLION, 3, BigDecimal.ROUND_HALF_EVEN);
+        System.out.println("\n" + (tac-tic)/1000 + "s elapsed");
     }
 }
