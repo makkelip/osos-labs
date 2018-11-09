@@ -10,8 +10,8 @@ import java.util.Scanner;
 
 public class Lab06 {
 
-    private static final String FILE = "./src/lab06/hard33.txt";
-    private final static int ALG = 3;
+    private static final String FILE = "./src/lab06/easy20.txt";
+    private final static int ALG = 4;
 
     /**
      * @param args the command line arguments
@@ -35,6 +35,9 @@ public class Lab06 {
             case 3:
                 ks.greedyheuristic();
                 break;
+            case 4:
+                ks.threadedBruteForce();
+                break;
         }
         long tac = System.currentTimeMillis();
 
@@ -46,6 +49,9 @@ public class Lab06 {
             case 2:
             case 3:
                 ks.printSolution("Feasible solution (not necessarily optimal) found: ");
+                break;
+            case 4:
+                ks.printSolution("Threaded: ");
                 break;
         }
 

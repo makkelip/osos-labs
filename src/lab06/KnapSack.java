@@ -4,21 +4,38 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 
-public class KnapSack {
+public class KnapSack implements Runnable {
 
     private int C;
     private int N;
     private int[] values;
     private int[] weights;
-    private int[] solution;
+    private int[] solution = new int[0];
 
     private double FINALCOMBS = 0;
     private double COMBS = 0;
     private DecimalFormat df = new DecimalFormat("#.##");
-    private static final BigDecimal MILLION = new BigDecimal("1000000");
+
+    //for threading
+    private String name;
+    private int index;
+    private int[] items;
+    private int[] from;
+
+    public KnapSack() {}
+
+    public KnapSack(String name, int index, int[] items, int[] from) {
+        this.name = name;
+        this.index = index;
+        this.items = items;
+        this.from = from;
+    }
 
     public boolean readKnapSack(File file) {
         try {
@@ -58,6 +75,93 @@ public class KnapSack {
     public void printSolution(String s) {
         System.out.println(s + "value: " + valueSum(solution) + " weight: " + weightSum(solution) + '\n'
                 + Arrays.toString(solution));
+    }
+
+    public void threadedBruteForce() {
+        int numInitItems = 2;
+        int numThreads;
+        int processors;
+        List<List<Integer>> integerSubset;
+        int[][] knapSacks;
+        /*
+        processors = Runtime.getRuntime().availableProcessors();
+        numInitItems = (int) Math.ceil(Math.log(processors) / Math.log(2));
+        */
+        numThreads = (int)Math.pow(2, numInitItems);
+
+        List<Integer> nums = new ArrayList();
+        for (int i = 0; i < numInitItems; i++)
+            nums.add(i);
+        integerSubset = combinations(nums);
+
+        int[] burteFoceItems = new int[N-numInitItems];
+        for (int i = 0; i < burteFoceItems.length; i++)
+            burteFoceItems[i] = i + numInitItems;
+        int[][] intSubset = new int[numThreads][0];
+        for (int i = 0; i < numThreads; i++) {
+            for (int j = 0; j < integerSubset.get(i).size(); j++) {
+                intSubset[i] = Arrays.copyOf(intSubset[i], intSubset[i].length + 1);
+                intSubset[i][intSubset[i].length - 1] = integerSubset.get(i).get(j);
+            }
+        }
+        KnapSack[] sacks = new KnapSack[numThreads];
+        Thread[] threads = new Thread[numThreads];
+        for (int i = 0; i < numThreads; i++) {
+            sacks[i] = new KnapSack("Sack"+i,numInitItems-1,intSubset[i], burteFoceItems);
+            sacks[i].weights = this.weights;
+            sacks[i].values = this.values;
+            sacks[i].N = this.N;
+            sacks[i].C = this.C;
+            threads[i] = new Thread(sacks[i], "Sack:" + i);
+            threads[i].start();
+        }
+        /*
+        CountDownLatch latch = new CountDownLatch(4);
+        try {
+            latch.await();
+            for (KnapSack sack: sacks) {
+                sack.printSolution("Solution: ");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        */
+    }
+
+    @Override
+    public void run() {
+        System.out.println("Starting thread: " + name);
+        COMBS = 0;
+        solution = bruteSearch(index,items,from);
+    }
+
+    public List<List<Integer>> combinations(List<Integer> num) {
+        if (num.size() > 1)
+        {
+            List<List<Integer>> result = new ArrayList<>();
+
+            for (Integer n : num)
+            {
+                List<Integer> subIntegers = new ArrayList<>(num);
+                subIntegers.remove(n);
+
+                result.add(new ArrayList<>(Arrays.asList(n)));
+
+                for (List<Integer> combinations : combinations(subIntegers))
+                {
+                    combinations.add(n);
+                    result.add(combinations);
+                }
+            }
+
+            return result;
+        }
+        else
+        {
+            List<List<Integer>> result = new ArrayList<>();
+            result.add(new ArrayList<>(num));
+            return result;
+        }
     }
 
     //Put one item to sack and fill rest with greedy algorithm
@@ -119,21 +223,27 @@ public class KnapSack {
         COMBS = 0;
         int oldPriority = Thread.currentThread().getPriority();
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-        solution = bruteSearch(0, new int[0]);
+        int[] def = new int[N];
+        for (int i = 0; i < def.length; i++)
+            def[i] = i;
+        solution = bruteSearch(0, new int[0], def);
         Thread.currentThread().setPriority(oldPriority);
     }
-    private int[] bruteSearch(int index, int[] items) {
+    public int[] bruteSearch(int index, int[] items, int[] from) {
         //Show progress in percentages
         COMBS++;
         if (COMBS % 1000000 == 0) System.out.println(df.format(COMBS / FINALCOMBS * 100) + "%");
 
         int[] childItems = new int[0];
-        for (int i = index; i < N; i++) {
-            int[] b = Arrays.copyOf(items, items.length + 1);
-            b[items.length] = i;
+        for (int i = index; i < from.length; i++) {
+            int[] b = items;
+            if (weightSum(items) + weights[i] <= C) {
+                b = Arrays.copyOf(items, items.length + 1);
+                b[items.length] = from[i];
+            }
             //Recursive. Goes one level deeper
-            b = bruteSearch(i + 1, b);
-            if (valueSum(b) > valueSum(childItems) && weightSum(b) <= C)
+            b = bruteSearch(i + 1, b, from);
+            if (valueSum(b) > valueSum(childItems))
                 childItems = b;
         }
         if (valueSum(items) > valueSum(childItems))
