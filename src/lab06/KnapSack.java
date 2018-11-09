@@ -2,13 +2,11 @@ package lab06;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.CountDownLatch;
 
 public class KnapSack implements Runnable {
 
@@ -107,12 +105,17 @@ public class KnapSack implements Runnable {
         }
         KnapSack[] sacks = new KnapSack[numThreads];
         Thread[] threads = new Thread[numThreads];
+        for (int i[]: intSubset)
+            System.out.println(Arrays.toString(i));
+        System.out.println("nums: " + (numInitItems));
+        System.out.println("bf: " + Arrays.toString(burteFoceItems));
         for (int i = 0; i < numThreads; i++) {
-            sacks[i] = new KnapSack("Sack"+i,numInitItems-1,intSubset[i], burteFoceItems);
+            sacks[i] = new KnapSack("Sack"+i,0,intSubset[i], burteFoceItems);
             sacks[i].weights = this.weights;
             sacks[i].values = this.values;
             sacks[i].N = this.N;
             sacks[i].C = this.C;
+            sacks[i].FINALCOMBS = Math.pow(2, N-numInitItems);
             threads[i] = new Thread(sacks[i], "Sack:" + i);
             threads[i].start();
         }
@@ -120,16 +123,21 @@ public class KnapSack implements Runnable {
         while (wait) {
             wait = false;
             for (KnapSack s: sacks) {
-                if (s.solution.length == 0) wait = true;
+                if (!s.complete) wait = true;
             }
+        }
+        for (KnapSack sack: sacks) {
+            if (valueSum(sack.solution) > valueSum(solution))
+                solution = sack.solution;
         }
     }
 
     @Override
     public void run() {
-        System.out.println("Starting thread: " + name);
+        System.out.println(name + " thread started");
         COMBS = 0;
         solution = bruteSearch(index,items,from);
+        System.out.println(name + " thread finished");
         complete = true;
     }
 
@@ -230,12 +238,12 @@ public class KnapSack implements Runnable {
     public int[] bruteSearch(int index, int[] items, int[] from) {
         //Show progress in percentages
         COMBS++;
-        if (COMBS % 1000000 == 0) System.out.println(df.format(COMBS / FINALCOMBS * 100) + "%");
+        if (COMBS % 10000000 == 0) System.out.println(df.format(COMBS / FINALCOMBS * 100) + "%");
 
         int[] childItems = new int[0];
         for (int i = index; i < from.length; i++) {
             int[] b = items;
-            if (weightSum(items) + weights[i] <= C) {
+            if (weightSum(items) + weights[from[i]] <= C) {
                 b = Arrays.copyOf(items, items.length + 1);
                 b[items.length] = from[i];
             }

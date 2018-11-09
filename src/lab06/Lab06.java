@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Lab06 {
 
-    private static final String FILE = "./src/lab06/easy20.txt";
+    private static final String FILE = "./src/lab06/hard33.txt";
     private final static int ALG = 4;
 
     /**
