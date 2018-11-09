@@ -27,6 +27,7 @@ public class KnapSack implements Runnable {
     private int index;
     private int[] items;
     private int[] from;
+    private boolean complete = false;
 
     public KnapSack() {}
 
@@ -115,17 +116,13 @@ public class KnapSack implements Runnable {
             threads[i] = new Thread(sacks[i], "Sack:" + i);
             threads[i].start();
         }
-        /*
-        CountDownLatch latch = new CountDownLatch(4);
-        try {
-            latch.await();
-            for (KnapSack sack: sacks) {
-                sack.printSolution("Solution: ");
+        boolean wait = true;
+        while (wait) {
+            wait = false;
+            for (KnapSack s: sacks) {
+                if (s.solution.length == 0) wait = true;
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
-        */
     }
 
     @Override
@@ -133,6 +130,7 @@ public class KnapSack implements Runnable {
         System.out.println("Starting thread: " + name);
         COMBS = 0;
         solution = bruteSearch(index,items,from);
+        complete = true;
     }
 
     public List<List<Integer>> combinations(List<Integer> num) {
