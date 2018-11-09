@@ -77,18 +77,16 @@ public class KnapSack implements Runnable {
     }
 
     public void threadedBruteForce() {
-        int numInitItems = 2;
+        int numInitItems;
         int numThreads;
         int processors;
         List<List<Integer>> integerSubset;
         int[][] knapSacks;
-        /*
-        processors = Runtime.getRuntime().availableProcessors();
-        numInitItems = (int) Math.ceil(Math.log(processors) / Math.log(2));
-        */
-        numThreads = (int)Math.pow(2, numInitItems);
 
-        List<Integer> nums = new ArrayList();
+        processors = Runtime.getRuntime().availableProcessors();
+        numInitItems = (int)Math.ceil(Math.log(8) / Math.log(2));
+        System.out.println("init items: " + numInitItems);
+        ArrayList<Integer> nums = new ArrayList<>();
         for (int i = 0; i < numInitItems; i++)
             nums.add(i);
         integerSubset = combinations(nums);
@@ -96,20 +94,21 @@ public class KnapSack implements Runnable {
         int[] burteFoceItems = new int[N-numInitItems];
         for (int i = 0; i < burteFoceItems.length; i++)
             burteFoceItems[i] = i + numInitItems;
-        int[][] intSubset = new int[numThreads][0];
-        for (int i = 0; i < numThreads; i++) {
+        int[][] intSubset = new int[processors][0];
+        for (int i = 0; i < processors; i++) {
             for (int j = 0; j < integerSubset.get(i).size(); j++) {
                 intSubset[i] = Arrays.copyOf(intSubset[i], intSubset[i].length + 1);
                 intSubset[i][intSubset[i].length - 1] = integerSubset.get(i).get(j);
             }
         }
-        KnapSack[] sacks = new KnapSack[numThreads];
-        Thread[] threads = new Thread[numThreads];
+        KnapSack[] sacks = new KnapSack[processors];
+        Thread[] threads = new Thread[processors];
+
         for (int i[]: intSubset)
             System.out.println(Arrays.toString(i));
-        System.out.println("nums: " + (numInitItems));
+
         System.out.println("bf: " + Arrays.toString(burteFoceItems));
-        for (int i = 0; i < numThreads; i++) {
+        for (int i = 0; i < processors; i++) {
             sacks[i] = new KnapSack("Sack"+i,0,intSubset[i], burteFoceItems);
             sacks[i].weights = this.weights;
             sacks[i].values = this.values;
@@ -127,6 +126,7 @@ public class KnapSack implements Runnable {
             }
         }
         for (KnapSack sack: sacks) {
+            System.out.println(sack.name + '\n' + Arrays.toString(solution));
             if (valueSum(sack.solution) > valueSum(solution))
                 solution = sack.solution;
         }
@@ -136,7 +136,10 @@ public class KnapSack implements Runnable {
     public void run() {
         System.out.println(name + " thread started");
         COMBS = 0;
+        int oldPriority = Thread.currentThread().getPriority();
+        Thread.currentThread().setPriority(8);
         solution = bruteSearch(index,items,from);
+        Thread.currentThread().setPriority(oldPriority);
         System.out.println(name + " thread finished");
         complete = true;
     }
