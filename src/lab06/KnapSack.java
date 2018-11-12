@@ -80,36 +80,44 @@ public class KnapSack implements Runnable {
         int numInitItems;
         int numThreads;
         int processors;
-        List<List<Integer>> integerSubset;
-        int[][] knapSacks;
+        int[][] intSubset;
+        ArrayList<String> binarySubset = new ArrayList<>();
+        List<List<Integer>> integerSubset = new ArrayList<>();
 
         processors = Runtime.getRuntime().availableProcessors();
-        numInitItems = (int)Math.ceil(Math.log(8) / Math.log(2));
-        System.out.println("init items: " + numInitItems);
-        ArrayList<Integer> nums = new ArrayList<>();
-        for (int i = 0; i < numInitItems; i++)
-            nums.add(i);
-        integerSubset = combinations(nums);
+        numInitItems = (int)Math.floor(Math.log(processors) / Math.log(2));
+        numThreads = (int)Math.pow(2,numInitItems);
 
-        int[] burteFoceItems = new int[N-numInitItems];
-        for (int i = 0; i < burteFoceItems.length; i++)
-            burteFoceItems[i] = i + numInitItems;
-        int[][] intSubset = new int[processors][0];
+        //helper array
+        for (int i = 0; i < numThreads; i++)
+            binarySubset.add(Integer.toBinaryString(i));
+
+        //generate unique integer subsets using binarySubset
+        for (int i = 0; i < numThreads; i++) {
+            integerSubset.add(new ArrayList<>());
+            for (int j = binarySubset.get(i).length() - 1; j >= 0; j--) {
+                if (binarySubset.get(i).charAt(j) == '1')
+                    integerSubset.get(i).add(binarySubset.get(i).length() - 1 - j);
+            }
+        }
+
+        int[] bruteFoceItems = new int[N-numInitItems];
+        for (int i = 0; i < bruteFoceItems.length; i++)
+            bruteFoceItems[i] = i + numInitItems;
+
+        intSubset = new int[processors][0];
         for (int i = 0; i < processors; i++) {
             for (int j = 0; j < integerSubset.get(i).size(); j++) {
                 intSubset[i] = Arrays.copyOf(intSubset[i], intSubset[i].length + 1);
                 intSubset[i][intSubset[i].length - 1] = integerSubset.get(i).get(j);
             }
         }
+
         KnapSack[] sacks = new KnapSack[processors];
         Thread[] threads = new Thread[processors];
 
-        for (int i[]: intSubset)
-            System.out.println(Arrays.toString(i));
-
-        System.out.println("bf: " + Arrays.toString(burteFoceItems));
         for (int i = 0; i < processors; i++) {
-            sacks[i] = new KnapSack("Sack"+i,0,intSubset[i], burteFoceItems);
+            sacks[i] = new KnapSack("Sack"+i,0,intSubset[i], bruteFoceItems);
             sacks[i].weights = this.weights;
             sacks[i].values = this.values;
             sacks[i].N = this.N;
@@ -118,6 +126,7 @@ public class KnapSack implements Runnable {
             threads[i] = new Thread(sacks[i], "Sack:" + i);
             threads[i].start();
         }
+
         boolean wait = true;
         while (wait) {
             wait = false;
@@ -125,8 +134,8 @@ public class KnapSack implements Runnable {
                 if (!s.complete) wait = true;
             }
         }
+
         for (KnapSack sack: sacks) {
-            System.out.println(sack.name + '\n' + Arrays.toString(solution));
             if (valueSum(sack.solution) > valueSum(solution))
                 solution = sack.solution;
         }
@@ -142,35 +151,6 @@ public class KnapSack implements Runnable {
         Thread.currentThread().setPriority(oldPriority);
         System.out.println(name + " thread finished");
         complete = true;
-    }
-
-    public List<List<Integer>> combinations(List<Integer> num) {
-        if (num.size() > 1)
-        {
-            List<List<Integer>> result = new ArrayList<>();
-
-            for (Integer n : num)
-            {
-                List<Integer> subIntegers = new ArrayList<>(num);
-                subIntegers.remove(n);
-
-                result.add(new ArrayList<>(Arrays.asList(n)));
-
-                for (List<Integer> combinations : combinations(subIntegers))
-                {
-                    combinations.add(n);
-                    result.add(combinations);
-                }
-            }
-
-            return result;
-        }
-        else
-        {
-            List<List<Integer>> result = new ArrayList<>();
-            result.add(new ArrayList<>(num));
-            return result;
-        }
     }
 
     //Put one item to sack and fill rest with greedy algorithm
@@ -242,6 +222,7 @@ public class KnapSack implements Runnable {
         //Show progress in percentages
         COMBS++;
         if (COMBS % 10000000 == 0) System.out.println(df.format(COMBS / FINALCOMBS * 100) + "%");
+        //if (this.name.equals("Sack0")) System.out.println(this.name + " " + Arrays.toString(items));
 
         int[] childItems = new int[0];
         for (int i = index; i < from.length; i++) {
