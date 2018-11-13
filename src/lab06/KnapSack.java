@@ -148,6 +148,7 @@ public class KnapSack implements Runnable {
         int oldPriority = Thread.currentThread().getPriority();
         Thread.currentThread().setPriority(8);
         solution = bruteSearch(index,items,from);
+        System.out.println(name + " solution: " + Arrays.toString(solution));
         Thread.currentThread().setPriority(oldPriority);
         System.out.println(name + " thread finished");
         complete = true;
@@ -218,27 +219,25 @@ public class KnapSack implements Runnable {
         solution = bruteSearch(0, new int[0], def);
         Thread.currentThread().setPriority(oldPriority);
     }
-    public int[] bruteSearch(int index, int[] items, int[] from) {
+
+    public int[] bruteSearch(int index, int[] inTo, int[] from) {
         //Show progress in percentages
         COMBS++;
         if (COMBS % 10000000 == 0) System.out.println(df.format(COMBS / FINALCOMBS * 100) + "%");
-        //if (this.name.equals("Sack0")) System.out.println(this.name + " " + Arrays.toString(items));
 
-        int[] childItems = new int[0];
+        int[] best = inTo;
+        int[] test = new int[0];
         for (int i = index; i < from.length; i++) {
-            int[] b = items;
-            if (weightSum(items) + weights[from[i]] <= C) {
-                b = Arrays.copyOf(items, items.length + 1);
-                b[items.length] = from[i];
+            if (weightSum(inTo) + weights[from[i]] <= C) {
+                test = Arrays.copyOf(inTo, inTo.length + 1);
+                test[inTo.length] = from[i];
+                //Recursive. Goes one level deeper
+                test = bruteSearch(i + 1, test, from);
             }
-            //Recursive. Goes one level deeper
-            b = bruteSearch(i + 1, b, from);
-            if (valueSum(b) > valueSum(childItems))
-                childItems = b;
+            if (valueSum(test) > valueSum(best))
+                best = test;
         }
-        if (valueSum(items) > valueSum(childItems))
-            return items;
-        return childItems;
+        return best;
     }
 
     //sorts based on value/weight ratio
